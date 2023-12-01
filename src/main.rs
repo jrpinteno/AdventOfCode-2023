@@ -39,14 +39,62 @@ fn part1(input: Vec<String>) -> u32 {
 		sum += number;
 	}
 
-	println!("{}", sum);
+	sum
+}
 
-	return sum;
+fn part2(input: Vec<String>) -> u32 {
+	let numbers = [
+		"zero",
+		"one",
+		"two",
+		"three",
+		"four",
+		"five",
+		"six",
+		"seven",
+		"eight",
+		"nine",
+		"zero",
+	];
+
+	let mut sum = 0;
+
+	for line in input {
+		let mut digits = Vec::<u32>::new();
+		let mut i = 0;
+
+		for c in line.chars() {
+			if c.is_numeric() {
+				digits.push(c.to_digit(10).unwrap());
+			} else {
+				for (index, number) in numbers.iter().enumerate() {
+					let substring = &line[i ..];
+
+					if substring.starts_with(number) {
+						digits.push(index as u32);
+						break;
+					}
+				}
+			}
+
+			i += 1;
+		}
+
+		let first_digit = digits.first().unwrap();
+		let second_digit = digits.last().unwrap();
+
+		sum += first_digit * 10 + second_digit;
+	}
+
+	sum
 }
 
 fn main() {
 	let input1 = read_lines("input/2023/day1.txt");
-	part1(input1);
+	println!("{}", part1(input1));
+
+	let input2 = read_lines("input/2023/day1.txt");
+	println!("{}", part2(input2));
 }
 
 #[cfg(test)]
@@ -69,5 +117,25 @@ mod tests {
 		}
 
 		assert_eq!(142, part1(lines_vec));
+	}
+
+	#[test]
+	fn test_parse2() {
+		let sample = "
+			two1nine
+			eightwothree
+			abcone2threexyz
+			xtwone3four
+			4nineeightseven2
+			zoneight234
+			7pqrstsixteen";
+
+		let lines_vec: Vec<String> = sample
+			.lines()
+			.map(|line| line.trim().to_string())
+			.filter(|line| !line.is_empty())
+			.collect();
+
+		assert_eq!(281, part2(lines_vec));
 	}
 }
