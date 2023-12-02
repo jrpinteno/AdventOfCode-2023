@@ -1,3 +1,5 @@
+mod day01;
+
 use std::fs::read_to_string;
 
 fn read_lines(filename: &str) -> Vec<String> {
