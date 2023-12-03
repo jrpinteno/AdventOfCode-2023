@@ -17,11 +17,11 @@ impl Part {
 	}
 }
 
-fn is_valid_symbol(symbol: char) -> bool {
-	symbol != '.' && symbol.is_ascii_punctuation()
+fn is_valid_symbol(symbol: char, is_gear: bool) -> bool {
+	(is_gear && symbol == '*') || symbol != '.' && symbol.is_ascii_punctuation()
 }
 
-fn extract_points(engine: &Vec<String>) -> Vec<Point> {
+fn extract_points(engine: &Vec<String>, is_gear: bool) -> Vec<Point> {
 	let mut points = Vec::new();
 	let mut i = 0;
 
@@ -29,7 +29,7 @@ fn extract_points(engine: &Vec<String>) -> Vec<Point> {
 		let mut j = 0;
 
 		for c in row.chars() {
-			if is_valid_symbol(c) {
+			if is_valid_symbol(c, is_gear) {
 				points.push(Point { x: i, y: j });
 			}
 
@@ -80,23 +80,41 @@ fn get_numbers(input: &Vec<String>) -> Vec<Part> {
 	}).collect()
 }
 
-fn sum_parts(schema: &Vec<String>) -> u32 {
-	let points = extract_points(&schema);
-	let numbers = get_numbers(&schema);
+fn sum_parts(schema: &Vec<String>, is_gear: bool) -> u32 {
+	let points = extract_points(&schema, is_gear);
+	let parts = get_numbers(&schema);
 
-	numbers.iter().filter(|&part| {
-		points.iter().any(|&point| {
-			part.is_adjacent(point)
-		})
-	}).map(|&part| part.number)
-		.sum()
+	if !is_gear {
+		parts.iter().filter(|&part| {
+			points.iter().any(|&point| {
+				part.is_adjacent(point)
+			})
+		}).map(|&part| part.number)
+			.sum()
+	} else {
+		points.iter().filter_map(|&point| {
+			let adjacent_parts: Vec<u32> = parts
+				.iter()
+				.filter(|part| part.is_adjacent(point))
+				.map(|part| part.number)
+				.collect();
+
+			if adjacent_parts.len() == 2 {
+				Some(adjacent_parts[0] * adjacent_parts[1])
+			} else {
+				None
+			}
+		}).sum()
+	}
 }
 
 fn main() {
 	let schema = utils::read_file_to_vector("input/2023/day3.txt").unwrap();
-	let sum = sum_parts(&schema);
-
+	let sum = sum_parts(&schema, false);
 	println!("{}", sum);
+
+	let sum_gears = sum_parts(&schema, true);
+	println!("{}", sum_gears);
 }
 
 #[cfg(test)]
@@ -118,13 +136,13 @@ mod tests {
 
 	#[test]
 	fn test_valid_symbols() {
-		assert_eq!(is_valid_symbol('_'), true);
-		assert_eq!(is_valid_symbol('+'), true);
-		assert_eq!(is_valid_symbol('*'), true);
-		assert_eq!(is_valid_symbol('@'), true);
-		assert_eq!(is_valid_symbol('.'), false);
-		assert_eq!(is_valid_symbol('d'), false);
-		assert_eq!(is_valid_symbol('8'), false);
+		assert_eq!(is_valid_symbol('_', false), true);
+		assert_eq!(is_valid_symbol('+', false), true);
+		assert_eq!(is_valid_symbol('*', false), true);
+		assert_eq!(is_valid_symbol('@', false), true);
+		assert_eq!(is_valid_symbol('.', false), false);
+		assert_eq!(is_valid_symbol('d', false), false);
+		assert_eq!(is_valid_symbol('8', false), false);
 	}
 
 	#[test]
@@ -140,7 +158,7 @@ mod tests {
 			Point { x: 8, y: 5 }
 		];
 
-		let extracted_points = extract_points(&sample);
+		let extracted_points = extract_points(&sample, false);
 		assert_eq!(extracted_points.len(), points.len());
 		assert_eq!(points, extracted_points);
 	}
@@ -169,8 +187,16 @@ mod tests {
 	#[test]
 	fn test_sample_1() {
 		let sample: Vec<String> = SAMPLE.to_string_vector();
-		let sum = sum_parts(&sample);
+		let sum = sum_parts(&sample, false);
 
 		assert_eq!(sum, 4361)
+	}
+
+	#[test]
+	fn test_sample_2() {
+		let sample: Vec<String> = SAMPLE.to_string_vector();
+		let sum = sum_parts(&sample, true);
+
+		assert_eq!(sum, 467835)
 	}
 }
