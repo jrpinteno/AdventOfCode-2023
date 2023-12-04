@@ -39,3 +39,12 @@ and checking the adjacency.
 
 Second part was quite straightforward once again. I refactored a bit some of the methods to accept an `is_gear` bool and for the sum of _gear ratios_ the iterators are reversed:
 External iteration over points filtering when the symbol would had exactly 2 adjacent parts .
+
+### Day 04
+The time I ~wasted~ invested in parsing the games for [day 02](###-day-02) has payed off and it's been fairly easy to get the different moving parts for today's challenge.
+Part 1 was a walk in the park. Upon reading it, what came to mind was using _set intersection_, but I realized it was enough by just filtering out numbers in one side from the other.
+
+For the second part, I created a `card_copies` vector initially holding 1 for all. Then just modified the `get_card_score` to return a tuple `(score, matched_count)`. `matched_count` is
+used to add same amount of copies we already have of a given card, to the next `matched_count` cards in the copies vector.
+
+In terms of difficulty, I'd say this would have been good for [day 02](###-day-02). That one felt more complicated.
