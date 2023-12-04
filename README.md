@@ -48,3 +48,6 @@ For the second part, I created a `card_copies` vector initially holding 1 for al
 used to add same amount of copies we already have of a given card, to the next `matched_count` cards in the copies vector.
 
 In terms of difficulty, I'd say this would have been good for [day 02](###-day-02). That one felt more complicated.
+
+_Addendum_: Quickly implemented a simple `Grid` struct helper for the future. I feel it coming into use very soon, I'll add at that point the parsing into the grid implementation. Might even revisit [day 02](###-day-02)
+at some point and add the helper functions needed for that one.
