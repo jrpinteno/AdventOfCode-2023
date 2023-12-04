@@ -6,30 +6,44 @@ fn union_elements_count(lhs: Vec<&str>, rhs: Vec<&str>) -> usize {
 		.count()
 }
 
-fn get_card_score(card: &String) -> u32 {
+fn get_card_score(card: &String) -> (u32, usize) {
 	let numbers: Vec<_> = card.split(": ").skip(1).nth(0).unwrap().split(" | ").collect();
 	let lottery: Vec<_> = numbers[0].split_whitespace().collect();
 	let hold: Vec<_> = numbers[1].split_whitespace().collect();
 	let matched_count = union_elements_count(lottery, hold);
 
-	if matched_count == 0 { 0 } else { u32::pow(2, (matched_count - 1) as u32) }
+	(if matched_count == 0 { 0 } else { u32::pow(2, (matched_count - 1) as u32) }, matched_count)
 }
 
-fn sum_cards_score(cards: &Vec<String>) -> u32 {
-	let mut sum = 0;
+fn sum_cards_score(cards: &Vec<String>) -> (u32, u32) {
+	let mut part1_sum = 0;
+	let mut part2_sum = 0;
+
+	let mut card_index = 0;
+	let mut card_copies: Vec<u32> = vec![1; cards.len()];
 
 	for card in cards {
-		sum += get_card_score(card);
+		let (score, match_count) = get_card_score(card);
+
+		part1_sum += score;
+		part2_sum += card_copies[card_index];
+
+		card_index += 1;
+
+		for i in card_index..card_index+match_count {
+			card_copies[i] += card_copies[card_index - 1];
+		}
 	}
 
-	sum
+	(part1_sum, part2_sum)
 }
 
 fn main() {
 	let cards = utils::read_file_to_vector("input/2023/day4.txt").unwrap();
-	let sum = sum_cards_score(&cards);
+	let (part1_sum, part2_sum) = sum_cards_score(&cards);
 
-	println!("{}", sum);
+	println!("{}", part1_sum);
+	println!("{}", part2_sum)
 }
 
 #[cfg(test)]
@@ -48,8 +62,19 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11";
 	const SAMPLE_CARD: &str = "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53";
 
 	#[test]
+	fn test_matching_numbers() {
+		let card = SAMPLE_CARD.to_string();
+		let numbers: Vec<_> = card.split(": ").skip(1).nth(0).unwrap().split(" | ").collect();
+		let lottery: Vec<_> = numbers[0].split_whitespace().collect();
+		let hold: Vec<_> = numbers[1].split_whitespace().collect();
+		let matched_count = union_elements_count(lottery, hold);
+
+		assert_eq!(matched_count, 4);
+	}
+
+	#[test]
 	fn test_single_card_score() {
-		let score = get_card_score(&SAMPLE_CARD.to_string());
+		let score = get_card_score(&SAMPLE_CARD.to_string()).0;
 
 		assert_eq!(score, 8)
 	}
@@ -57,12 +82,16 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11";
 	#[test]
 	fn test_sample_1() {
 		let cards = SAMPLE.to_string_vector();
-		let sum = sum_cards_score(&cards);
+		let sum = sum_cards_score(&cards).0;
 
 		assert_eq!(sum, 13);
 	}
 
 	#[test]
 	fn test_sample_2() {
+		let cards = SAMPLE.to_string_vector();
+		let sum = sum_cards_score(&cards).1;
+
+		assert_eq!(sum, 30);
 	}
 }
