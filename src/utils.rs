@@ -14,8 +14,26 @@ pub fn read_file_to_vector(file_path: &str) -> Result<Vec<String>, io::Error> {
 	Ok(lines_vec)
 }
 
+pub fn read_file_to_blocks(file_path: &str) -> Result<Vec<Vec<String>>, io::Error> {
+	let file = File::open(file_path)?;
+	let reader = io::BufReader::new(file);
+
+	let lines_vec: Vec<_> = reader
+		.lines()
+		.map(|line| line.unwrap().trim().to_string())
+		.collect::<Vec<_>>()
+		.split(|line| line.trim().is_empty())
+		.filter(|block| !block.is_empty())
+		.map(|block| block.iter().map(|line| line.trim().to_string()).collect())
+		.collect();
+
+	Ok(lines_vec)
+}
+
+
 pub trait StringExtension {
 	fn to_string_vector(&self) -> Vec<String>;
+	fn to_string_blocks(&self) -> Vec<Vec<String>>;
 }
 
 impl StringExtension for str {
@@ -23,6 +41,16 @@ impl StringExtension for str {
 		self.lines()
 			.map(|line| line.trim().to_string())
 			.filter(|line| !line.is_empty())
+			.collect()
+	}
+
+	fn to_string_blocks(&self) -> Vec<Vec<String>> {
+		self.lines()
+			.map(|line| line.trim().to_string())
+			.collect::<Vec<_>>()
+			.split(|line| line.trim().is_empty())
+			.filter(|block| !block.is_empty())
+			.map(|block| block.iter().map(|line| line.trim().to_string()).collect::<Vec<_>>())
 			.collect()
 	}
 }
@@ -42,11 +70,8 @@ pub struct Grid {
 
 impl Grid {
 	pub fn new(rows: usize, columns: usize, default_value: char) -> Self {
-		let mut data = Vec::new();
-		data.resize(rows.checked_mul(columns).unwrap(), default_value);
-
 		Self {
-			data,
+			data: vec![default_value; rows.checked_mul(columns).unwrap()],
 			rows,
 			columns
 		}
@@ -58,7 +83,7 @@ impl Grid {
 
 	fn get_value(&self, x: usize, y: usize) -> Option<char> {
 		if !(0 .. self.columns).contains(&y) || !(0 .. self.rows).contains(&x) {
-			None
+			return None
 		}
 
 		let index = self.get_index(x, y);
