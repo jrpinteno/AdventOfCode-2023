@@ -67,7 +67,8 @@ v^2 - vt + d &= 0
 \end{align}
 ```
 
-Solving the quadratic equation we obtain
+Solving the quadratic equation we obtain the minimum and maximum time we can be accelerating which allows our car to **surpass** the given distance.
+
 ```math
 \begin{cases}
 t_1 = \dfrac{t + \sqrt{\strut t^2 - 4\cdot d}}{2} \\[8pt]
