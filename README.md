@@ -51,3 +51,41 @@ In terms of difficulty, I'd say this would have been good for [day 02](###-day-0
 
 _Addendum_: Quickly implemented a simple `Grid` struct helper for the future. I feel it coming into use very soon, I'll add at that point the parsing into the grid implementation. Might even revisit [day 02](###-day-02)
 at some point and add the helper functions needed for that one.
+
+### Day 05
+
+### Day 06
+I knew from the beginning I'd solve this one by using math instead of bruteforce, although for the first part I implemented the brute force version.
+
+The idea is quite basic. The basic equation for movement is $d = v * t$. In our case, while the car is accelerating it is not moving. Let's consider it's accumulating 
+speed at a constant rate of $1 \text{mm}/\text{ms}$. Therefore,
+```math
+\begin{align}
+d &= v \cdot t \\
+0 &= v \cdot \left(t - v\right) - d\\
+v^2 - vt + d &= 0
+\end{align}
+```
+
+Solving the quadratic equation we obtain
+```math
+\begin{cases}
+t_1 = \dfrac{t + \sqrt{\strut t^2 - 4\cdot d}}{2} \\[8pt]
+t_2 = \dfrac{t - \sqrt{\strut\displaystyle t^2 - 4\cdot d}}{2} \\
+\end{cases}
+```
+
+All that's left is implementing that into code and profit.
+
+### Day 07
+On my first read I thought it was more complicated than it actually was. I had a clear picture I would be using a [`BtreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html), so I could use the built-in ordering keys.
+I had understood, on that first read, that cards would need to be sorted in terms of strength so they could be compared afterwards, but actually
+what mattered was the strength AND the position in the hand for comparison, so no reordering cards on the hand. With that in mind I could have replaced the 
+[`HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html) but it wouldn't matter.
+
+For the comparison I almost implemented some of the traits, but realised it wasn't even necessary, as it was quite simple. The first option was to
+call [`sort_by_key`](https://docs.rs/itertools/latest/itertools/trait.Itertools.html#method.sorted_by_key), but it added some extra complexity with memory handling which
+I didn't want to deal with and ended up using `sort_by` and implemented the closure.
+
+As for the second part, I made a _naïve_ solution just checking inside [`determine_play`](https://github.com/jrpinteno/AdventOfCode-2023/blob/main/src/day07.rs#L46)'s `match` 
+whether the joker card was present and acted accordingly on the different cases.
