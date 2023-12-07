@@ -35,13 +35,12 @@ impl Hand {
    }
 
    fn create_play(&self) -> BTreeMap<u32, u32> {
-      let mut play: BTreeMap<u32, u32> = BTreeMap::new();
-   
-      for card in &self.cards {
-         *play.entry(*card).or_insert(0) += 1;
-      }
-   
-      play
+      self.cards
+         .iter()
+         .fold(BTreeMap::new(), |mut play, &card| {
+            *play.entry(card).or_insert(0) += 1;
+            play
+         })
    }
 
    fn determine_play(&self) -> HandPlay {
@@ -102,15 +101,11 @@ fn get_winnings(hands: &mut Vec<Hand>) -> u32 {
       lhs.cards.cmp(&rhs.cards)
    });
 
-   let mut winnings: u32 = 0;
-   let mut i = 1;
-
-   for hand in hands {
-      winnings += hand.bid * i;
-      i += 1;
-   }
-
-   winnings
+   hands.iter()
+      .enumerate()
+      .fold(0, |acc, (index, hand)| {
+         acc + hand.bid * (index as u32 + 1)
+      })
 }
 
 fn part_1(input: &Vec<String>) -> u32 {
