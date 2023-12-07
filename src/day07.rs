@@ -127,7 +127,7 @@ fn part_2(input: &Vec<String>) -> u32 {
 
 
 fn main() {
-   let input = utils::read_file_to_vector("day7.txt").unwrap();
+   let input = utils::read_file_to_vector("input/2023/day7.txt").unwrap();
    let winnings_part_1 = part_1(&input);
    println!("{}", winnings_part_1);
 
