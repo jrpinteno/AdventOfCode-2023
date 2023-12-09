@@ -14,6 +14,19 @@ pub fn read_file_to_vector(file_path: &str) -> Result<Vec<String>, io::Error> {
 	Ok(lines_vec)
 }
 
+pub fn read_file_to_line_number_vector(file_path: &str) -> Result<Vec<Vec<i32>>, io::Error> {
+	let file = File::open(file_path)?;
+	let reader = io::BufReader::new(file);
+
+	let lines = reader.lines().map(|line| {
+			line.map(|l| {
+				l.split_whitespace().filter_map(|num| num.parse().ok()).collect()
+			})
+		}).collect();
+
+	lines
+}
+
 pub fn read_file_to_blocks(file_path: &str) -> Result<Vec<Vec<String>>, io::Error> {
 	let file = File::open(file_path)?;
 	let reader = io::BufReader::new(file);
