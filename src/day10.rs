@@ -95,14 +95,25 @@ fn count_inner_tiles(log_grid: &mut Grid) -> i32 {
 	tiles_loop
 }
 
+fn get_next_direction(value: char, current_direction: Direction) -> Direction {
+	match value {
+		 'L' => if current_direction == Direction::South { Direction::East } else { Direction::North },
+		 'J' => if current_direction == Direction::East { Direction::North } else { Direction::West },
+		 '7' => if current_direction == Direction::East { Direction::South } else { Direction::West },
+		 'F' => if current_direction == Direction::North { Direction::East } else { Direction::South },
+		 '|' | '-' => current_direction,
+		 _ => panic!("Oops"),
+	}
+}
+
 fn traverse_pipes(start: Point, grid: &Grid) -> (i32, i32) {
 	let mut log_grid = grid.empty_copy_with_default('.');
-	let mut current_location = start.clone();
-	log_grid.set_value('S', current_location.x as usize, current_location.y as usize);
+	log_grid.set_value('S', start.x as usize, start.y as usize);
 
 	let first_directions = get_first_directions(start, &grid);
-	let mut direction = first_directions[0].clone();
 
+	let mut current_location = start.clone();
+	let mut direction = first_directions[0].clone();
 	current_location.move_to(&direction);
 
 	let mut distance = 1;
@@ -111,15 +122,7 @@ fn traverse_pipes(start: Point, grid: &Grid) -> (i32, i32) {
 		let value = grid.get_value(current_location.x as usize, current_location.y as usize).unwrap();
 		record_trip(value, &mut log_grid, &current_location);
 
-		direction = match value {
-			'L' => if direction == Direction::South { Direction::East } else { Direction::North },
-			'J' => if direction == Direction::East { Direction::North } else { Direction::West },
-			'7' => if direction == Direction::East { Direction::South } else { Direction::West },
-			'F' => if direction == Direction::North { Direction::East } else { Direction::South },
-			'|' | '-' => direction,
-			_ => panic!("Oops")
-		};
-
+		direction = get_next_direction(value, direction);
 		current_location.move_to(&direction);
 
 		distance += 1;
