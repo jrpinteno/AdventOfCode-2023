@@ -3,8 +3,8 @@ use core::fmt;
 #[derive(Debug, Clone)]
 pub struct Grid {
 	data: Vec<char>,
-	pub rows: usize,
-	pub columns: usize
+	rows: usize,
+	columns: usize
 }
 
 impl Grid {
@@ -24,6 +24,10 @@ impl Grid {
 		}
 	}
 
+	pub fn empty_copy_with_default(&self, default_value: char) -> Self {
+		Grid::new(self.rows, self.columns, default_value)
+	}
+
 	#[must_use]
 	pub fn from_string_vec(vector: &Vec<String>) -> Self {
 		if vector.is_empty() {
@@ -39,6 +43,10 @@ impl Grid {
 			rows: height,
 			columns: width
 		}
+	}
+
+	pub fn get_size(&self) -> (usize, usize) {
+		(self.columns, self.rows)
 	}
 
 	fn get_index(&self, x: usize, y: usize) -> usize {
