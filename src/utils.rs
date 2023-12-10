@@ -78,8 +78,8 @@ pub struct Point {
 #[derive(Debug, Clone)]
 pub struct Grid {
 	data: Vec<char>,
-	rows: usize,
-	columns: usize
+	pub rows: usize,
+	pub columns: usize
 }
 
 impl Grid {
@@ -137,6 +137,17 @@ impl Grid {
 		if let Some(cell) = self.data.get_mut(index) {
 			*cell = value;
 		}
+	}
+
+	pub fn find(&self, value: char) -> Option<(i32, i32)> {
+		if let Some(index) = self.data.iter().position(|&item| item == value) {
+			let x: i32 = (index as i32) / (self.columns as i32);
+			let y: i32 = (index as i32) % (self.columns as i32);
+
+			return Some((x, y))
+		}
+
+		None
 	}
 }
 
