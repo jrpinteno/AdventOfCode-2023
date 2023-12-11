@@ -2,11 +2,11 @@ use aoc_2023::utils::grid::Grid;
 use aoc_2023::utils::point::Point;
 use aoc_2023::utils::utils;
 
-fn find_voids<T, F>(data: T) -> Vec<i64> where T: IntoIterator<Item = F>, F: AsRef<[char]> {
+fn find_voids<T>(data: T) -> Vec<i64> where T: IntoIterator<Item = Vec<char>> {
 	data.into_iter()
 		.enumerate()
 		.filter_map(|(index, sequence)| {
-			if sequence.as_ref().iter().any(|&cell| cell != '.') {
+			if sequence.iter().any(|&cell| cell != '.') {
 				None
 			} else {
 				Some(index as i64)
@@ -24,16 +24,11 @@ fn expand_universe(universe: &mut Grid) {
 }
 
 fn find_galaxies(universe: &Grid) -> Vec<Point> {
-	universe.iter_rows()
-		.enumerate()
-		.flat_map(|(x, row)| {
-			row.iter()
-				.enumerate()
-				.filter_map(move |(y, &ch)| (ch == '#')
-					.then(|| Point::new(x as i64, y as i64)))
-				.collect::<Vec<_>>()
-		})
-		.collect::<Vec<_>>()
+	universe
+		.find_all('#')
+		.iter()
+		.map(|&(x, y)| Point::new(x as i64, y as i64))
+		.collect()
 }
 
 fn get_galaxy_distances(universe: &Grid) -> Vec<u64> {
@@ -59,7 +54,7 @@ fn count_voids_between(points: &(i64, i64), voids: &Vec<i64>) -> u64 {
 		.count() as u64
 }
 
-fn get_galaxy_distances_expansion(universe: &Grid, expansion_actor: u32) -> u64 {
+fn get_galaxy_distances_expansion(universe: &Grid, expansion_factor: u32) -> Vec<u64> {
 	let horizontal_voids = &find_voids(universe.iter_rows());
 	let vertical_voids = &find_voids(universe.iter_columns());
 	let galaxies = find_galaxies(&universe);
@@ -71,9 +66,9 @@ fn get_galaxy_distances_expansion(universe: &Grid, expansion_actor: u32) -> u64 
 				let h_voids_between = count_voids_between(&(p1.x, p2.x), &horizontal_voids);
 				let v_voids_between = count_voids_between(&(p1.y, p2.y), &vertical_voids);
 
-				p1.manhattan_to(&p2) + (h_voids_between + v_voids_between) * (expansion_actor as u64 - 1)
+				p1.manhattan_to(&p2) + (h_voids_between + v_voids_between) * (expansion_factor as u64 - 1)
 			}))
-		.collect::<Vec<_>>().iter().fold(0, |acc, &x| acc + x as u64)
+		.collect::<Vec<_>>()
 }
 
 fn part_1(input: &Vec<String>) -> u64 {
@@ -86,8 +81,9 @@ fn part_1(input: &Vec<String>) -> u64 {
 
 fn part_2(input: &Vec<String>, expansion_factor: u32) -> u64 {
 	let universe = Grid::from_string_vec(&input);
-	let distance = get_galaxy_distances_expansion(&universe, expansion_factor);
-	distance
+
+	let distances = get_galaxy_distances_expansion(&universe, expansion_factor);
+	distances.iter().fold(0, |acc, &x| acc + x )
 }
 
 fn main() {
@@ -208,5 +204,4 @@ mod tests {
 
 		assert_eq!(result, 8410);
 	}
-
 }

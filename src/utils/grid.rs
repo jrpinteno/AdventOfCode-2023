@@ -85,6 +85,19 @@ impl Grid {
 		None
 	}
 
+	pub fn find_all(&self, value: char) -> Vec<(i32, i32)> {
+		self.iter_rows()
+			.enumerate()
+			.flat_map(|(x, row)| {
+				row.iter()
+					.enumerate()
+					.filter_map(move |(y, &c)| (c == value)
+						.then(|| (x as i32, y as i32)))
+					.collect::<Vec<_>>()
+			})
+			.collect::<Vec<_>>()
+	}
+
 	// Custom iterator for iterating over columns
 	pub fn iter_columns(&self) -> impl Iterator<Item = Vec<char>> + '_ {
 		(0..self.columns).map(move |col| {
