@@ -1,22 +1,23 @@
-use std::ops::{Add, AddAssign, Sub, SubAssign};
+use core::fmt;
+use std::ops::{Add, AddAssign, Sub, SubAssign, Mul};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Point {
-	pub x: i32,
-	pub y: i32
+	pub x: i64,
+	pub y: i64
 }
 
 
 impl Point {
 	#[inline]
 	#[must_use]
-	pub fn new(x: i32, y: i32) -> Self {
+	pub fn new(x: i64, y: i64) -> Self {
 		Self { x, y }
 	}
 
 	#[inline]
 	#[must_use]
-	pub fn from(value: (i32, i32)) -> Self {
+	pub fn from(value: (i64, i64)) -> Self {
 		Self {
 			x: value.0,
 			y: value.1
@@ -27,6 +28,10 @@ impl Point {
 		let point = direction.point();
 
 		*self += point;
+	}
+
+	pub fn manhattan_to(&self, other: &Point) -> u64 {
+		self.x.abs_diff(other.x) + self.y.abs_diff(other.y)
 	}
 }
 
@@ -73,6 +78,24 @@ impl SubAssign for Point {
 	fn sub_assign(&mut self, rhs: Self) {
 		self.x -= rhs.x;
 		self.y -= rhs.y;
+	}
+}
+
+
+impl Mul<i64> for Point {
+	type Output = Self;
+
+	fn mul(self, scalar: i64) -> Self::Output {
+		Self {
+			x: self.x * scalar,
+			y: self.y * scalar
+		}
+	}
+}
+
+impl fmt::Display for Point {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "({}, {})", self.x, self.y)
 	}
 }
 
