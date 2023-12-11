@@ -84,7 +84,49 @@ impl Grid {
 
 		None
 	}
+
+	// Custom iterator for iterating over columns
+	pub fn iter_columns(&self) -> impl Iterator<Item = Vec<char>> + '_ {
+		(0..self.columns).map(move |col| {
+			(0..self.rows).map(move |row| self.data[row * self.columns + col]).collect()
+		})
+	}
+
+	// Custom iterator for iterating over rows
+	pub fn iter_rows(&self) -> impl Iterator<Item = Vec<char>> + '_ {
+		(0..self.rows).map(move |row| {
+			self.data[row * self.columns..(row + 1) * self.columns].to_vec()
+		})
+	}
 }
+
+
+impl Grid {
+	pub fn insert_row_at(&mut self, position: usize, default_value: char) {
+		if position > self.rows {
+			panic!("Invalid row insertion position");
+		}
+
+		let start_index = position * self.columns;
+
+		self.data.splice(start_index .. start_index, std::iter::repeat(default_value).take(self.columns));
+		self.rows += 1;
+	}
+
+	pub fn insert_column_at(&mut self, position: usize, default_value: char) {
+		if position > self.columns {
+			panic!("Invalid column insertion position");
+		}
+
+		for row in (0 .. self.rows).rev() {
+			let insert_index = row * self.columns + position;
+			self.data.insert(insert_index, default_value);
+		}
+
+		self.columns += 1;
+	}
+}
+
 
 impl fmt::Display for Grid {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
