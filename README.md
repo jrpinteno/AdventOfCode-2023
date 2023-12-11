@@ -90,3 +90,57 @@ I didn't want to deal with and ended up using `sort_by` and implemented the clos
 
 As for the second part, I made a _naïve_ solution just checking inside [`determine_play`](https://github.com/jrpinteno/AdventOfCode-2023/blob/main/src/day07.rs#L46)'s `match` 
 whether the joker card was present and acted accordingly on the different cases.
+
+
+### Day 08
+Challenge today was to follow a set of instructions (left or right) from a starting node, thus falling onto a different node. Rinse and repeat until we reach node `ZZZ`. 
+`HashMap<String, Node>` to the rescue, where the `Node` contains two fields (one per instruction left/right) with a new string.
+First part was fairly easy, and I could see the cycles coming to haunt like ghosts for the second part.
+
+And I was right, now we have a map for ghosts. Instead of a single starting node, we now have a few of them (all ending with `A`). Now the condition
+to end is that all the ghosts are at the sime time in nodes ending with `Z`. Bruteforcing this would have been insane.
+Luckily, since it looks we have cycles, and they should converge at some point (as in, there is a bigger cycle encompassing all of them, we can use LCM.
+
+That said... I was puzzled for more than 30 minutes. Execution was not ending. I stopped it, added good old prints... and it was working, but neverending.
+As it turns out, I had a nasty bug. I was using the same parsed [instructions](https://github.com/jrpinteno/AdventOfCode-2023/blob/main/src/day08.rs#L106) for both parts. One after the other.
+And since I had the instructions on a [`VecDeque`](https://doc.rust-lang.org/std/collections/struct.VecDeque.html) (to get and push back the current instruction), that object was mutable.
+After adding `.clone()`, everything went smoothly. Had I split the parts, I wouldn't have notice that issue, so it was a learning experience.
+
+Could have avoided using `VecDeque` had I known about [`.iter().cycle()`](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.cycle).
+Instead of _popping_ / _pushing_ instructions, could have iterated using in combination with [`scan`](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.scan) until reaching the final condition, thus exiting the cycle.
+
+
+### Day 09
+Not much to say about this one. Quite straightforward (I was expecting it to be harder on a weekend). Predicting the next value on a series was just a matter
+of continuosly subtracting the elements of the vector in pairs (learnt about [`.windows()`](https://doc.rust-lang.org/std/slice/struct.Windows.html)). 
+Once all are zero, sum the last element of each intermediate vector and that's it.
+
+For the second part, the idea is similar. Keep track of the first value of each intermediate vector and subtract from last to first the accumulated value.
+
+
+### Day 10
+Here comes the grid. I started the day adding format to my grid in order to be able to properly visualize and debug.
+
+In the first part we need to tell the shortest distance to the farthest point in the _cycle_ (and that is a keyword for this part). Initially I was really tempted (and confused perhaps)
+to use BFS and find my path there. But then I realized the path is alredy defined, we only needed to count the steps. On each cell of the grid we have a char which defines a double-entry pipe.
+
+First we need to find where do we even begin our cycle (marked by `S` in the input). For that matter I added the [`.find()`](https://github.com/jrpinteno/AdventOfCode-2023/blob/main/src/utils/grid.rs#L77)
+method to my `Grid`. Next comes the mapping of the different directions (`North`, `East`, `South`, `West`) to the different `char`s that contain them.
+With the starting point, we can iterate over the directions and check which one comes first that we can follow (we have two of them since we are indeed in a cycle). After that,
+keep walking, we keep track of which direction we have entered to the new pipe and have a clear exit. 
+
+Once we have reached the starting point again we are done. The distance to the farthest point is half the steps taken.
+
+While trying to figure out the second part, I made some visualization of the pipe traversal from the output of one of the tests
+
+![pipes](https://github.com/jrpinteno/AdventOfCode-2023/assets/1807002/8abf3d05-0cc1-429d-a37c-eb0db581e0f0)
+
+For that visualization I created a copy of the original grid, but empty. And that will come in handy for the second part (I didn't know at the moment).
+
+I had some vague recollection that it was possible to compute the area of any polygon on a grid and get the amount of points within that area (not on the border). But didn't recall how it worked, I googled
+a bit and found about [Shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula) and [Pick's theorem](https://en.wikipedia.org/wiki/Pick%27s_theorem). So this is exactly what I needed, but was not
+sure how to implement. I decided to take a different approach, the [Ray Casting algorithm](https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm). Cast the rays horizontally on the grid,
+and flip a boolean whenever we have a vertical wall.
+
+
+
